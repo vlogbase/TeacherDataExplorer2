@@ -1,0 +1,169 @@
+Please build a full-stack web application to analyze a dataset of Nigerian teachers and present answers to the listed 73 questions in a visual format (charts/graphs). Below are the requirements and architecture guidelines:
+
+1. Tech Stack
+Backend
+
+Node.js + Express for creating RESTful API endpoints.
+Use a relational database (e.g., PostgreSQL) to store and query teacher data.
+For database interaction, use an ORM such as Sequelize or TypeORM.
+Use a CSV parsing library (e.g., fast-csv) to import the teacher data from CSV.
+Data Processing
+
+(Optional) For advanced data cleaning or aggregation, you can integrate Python scripts (Pandas) before loading data into the DB. Otherwise, do simpler calculations via SQL queries or JavaScript.
+Frontend
+
+React for the front-end UI.
+A charting library, such as Chart.js, Recharts, or Victory, for creating interactive charts.
+A design framework, e.g. Material-UI (MUI) or Bootstrap, to ensure a clean, responsive layout.
+2. Data Model & Endpoints
+Database Schema
+
+Store each teacher’s details (First Name, Last Name, Email, Phone, Gender, LGA, etc.) in a teachers table.
+Additional tables if needed (e.g. for teacher qualifications, schools, multi-option answers).
+API Routes
+
+GET /api/teachers: Returns a list of teachers (possibly with pagination).
+GET /api/charts/...: For each question below, create an endpoint that returns the aggregated data needed to plot a chart (counts by gender, LGA, qualification type, etc.).
+Examples:
+
+GET /api/charts/teachers-by-gender → returns { male: X, female: Y, other: Z }.
+GET /api/charts/teachers-by-lga → returns an array of objects like [ { lga: 'X', count: 25 }, { lga: 'Y', count: 40 }, ... ].
+3. Front-End Structure
+Dashboard Page
+
+A grid or list of 73 buttons, each labeled according to the question (e.g., “Number of teachers by LGA,” “State of Origin by Gender,” etc.).
+When a button is clicked, the front-end makes an API call (e.g., fetch('/api/charts/teachers-by-lga')).
+Parse the returned JSON and display it in a chart (bar chart, pie chart, or whichever is most appropriate).
+If you want to group questions (e.g., “General Analysis,” “Teacher Background,” etc.), you can organize them into collapsible sections or a sidebar menu.
+Chart Components
+
+A generic <ChartDisplay /> React component that accepts data + chart type as props and renders the appropriate chart.
+Example:
+jsx
+Copy
+Edit
+<ChartDisplay 
+  chartType="Bar" 
+  data={dataFromApi} 
+  xKey="lga" 
+  yKey="count"
+  title="Number of Teachers by LGA" 
+/>
+UI/UX Best Practices
+
+Use a library like Material-UI or Bootstrap for responsive grid layouts and styled buttons.
+Ensure each chart has clear labels, legends, and tooltips to make data easy to interpret.
+4. Implementation Steps
+Setup & Configuration
+
+Initialize a Node.js project (npm init), install Express, Sequelize (or TypeORM), pg (PostgreSQL driver), fast-csv, etc.
+Create a React app (create-react-app) or use Vite if you prefer.
+Database & Models
+
+Create a Teacher model with fields like:
+js
+Copy
+Edit
+{
+  firstName: DataTypes.STRING,
+  lastName: DataTypes.STRING,
+  // ...
+  nin: DataTypes.STRING,
+  // ...
+  gender: DataTypes.ENUM('Male','Female','Other'),
+  stateOfOrigin: DataTypes.STRING,
+  lga: DataTypes.STRING,
+  // ...
+}
+Run migrations or synchronize models with your Postgres DB.
+CSV Import
+
+Write a script (e.g. scripts/importTeachers.js) that uses fast-csv to parse the CSV file, then creates teacher records in the database. Example:
+js
+Copy
+Edit
+fs.createReadStream('teachers.csv')
+  .pipe(csvParser({ headers: true }))
+  .on('data', async (row) => {
+    await Teacher.create(row);
+  });
+API Endpoints
+
+For each question in the list (1–73), decide on the grouping or direct approach. For instance:
+js
+Copy
+Edit
+app.get('/api/charts/teachers-by-lga', async (req, res) => {
+  const results = await Teacher.findAll({
+    attributes: ['lga', [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']],
+    group: ['lga']
+  });
+  res.json(results);
+});
+Repeat for other queries, adjusting the group/filter logic as needed.
+Front-End Components
+
+Create a QuestionsList.jsx that maps over the 73 questions. For each question, display a button.
+When the user clicks a button, call the relevant endpoint, fetch the data, and display it in a <ChartDisplay /> component.
+Charts
+
+In React, install Chart.js or Recharts. For example, with Chart.js:
+bash
+Copy
+Edit
+npm install react-chartjs-2 chart.js
+Implement <ChartDisplay />:
+jsx
+Copy
+Edit
+import { Bar } from 'react-chartjs-2';
+
+function ChartDisplay({ data }) {
+  const chartData = {
+    labels: data.map(item => item.lga),
+    datasets: [{
+      label: '# of Teachers',
+      data: data.map(item => item.count),
+      backgroundColor: 'rgba(75,192,192,0.4)',
+    }],
+  };
+  return <Bar data={chartData} />;
+}
+
+export default ChartDisplay;
+Adjust as needed for pie, line, or other chart types.
+Testing & Deployment
+
+Verify queries return correct data (use test data or automated tests).
+Deploy the API (e.g., to Heroku/AWS), and the React app (e.g., Netlify/Vercel).
+Ensure environment variables for DB credentials, etc., are secure.
+5. Answering the 73 Questions
+For each item (1–73) in the “LIST OF DATA TABLES,” do the following:
+
+Create a dedicated endpoint that returns the aggregated data needed to produce the chart. Example:
+
+Question #4: “Number of teachers by LGA”
+Endpoint: /api/charts/teachers-by-lga
+Query: SELECT lga, COUNT(*) AS count FROM teachers GROUP BY lga;
+Return JSON, e.g.:
+json
+Copy
+Edit
+[
+  { "lga": "Chanchaga", "count": 12 },
+  { "lga": "Gurara", "count": 5 },
+  ...
+]
+In React, create a button labeled Number of teachers by LGA. When clicked, call the endpoint and visualize the returned data in a bar chart.
+
+Repeat for each question, modifying the endpoint’s query to match the grouping criteria (by gender, by qualification, etc.). Use additional tables or columns if needed (e.g., “children in teacher household”).
+
+Free-Text Fields (like #66 “Additional training needed”) can be handled either by:
+
+Displaying them in a table or
+Creating word clouds or other textual analyses, if desired.
+6. Final Notes
+Make sure each chart or table has clear labels, axis titles, and a short description.
+Group related questions into sections (General Analysis, Teacher Background, etc.) for better UX.
+Implement search/filter features if needed (e.g., filtering by state or LGA).
+Provide an export option if you want users to download charts or data (e.g., react-to-print or PDF generation with jspdf).
