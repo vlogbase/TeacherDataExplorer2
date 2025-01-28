@@ -19,12 +19,14 @@ def show(df):
 
     # State of Origin by Gender
     st.subheader("State of Origin by Gender")
-    state_gender = pd.crosstab(df['State of Origin'], df['Gender']).reset_index()
+    state_gender = df.groupby(['State of Origin', 'Gender']).size().reset_index(name='Count')
     fig_state_gender = create_bar_chart(
         state_gender,
         x='State of Origin',
-        y=['Male', 'Female'],
-        title='State of Origin Distribution by Gender'
+        y='Count',
+        color='Gender',
+        title='State of Origin Distribution by Gender',
+        barmode='group'
     )
     st.plotly_chart(fig_state_gender, use_container_width=True)
 

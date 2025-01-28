@@ -31,12 +31,14 @@ def show(df):
 
     # Teaching Qualification by Gender
     st.subheader("Teaching Qualification by Gender")
-    qual_gender = pd.crosstab(df['Teaching Qualification'], df['Gender']).reset_index()
+    qual_gender = df.groupby(['Teaching Qualification', 'Gender']).size().reset_index(name='Count')
     fig_qual_gender = create_bar_chart(
         qual_gender,
         x='Teaching Qualification',
-        y=['Male', 'Female'],
-        title='Teaching Qualifications by Gender'
+        y='Count',
+        color='Gender',
+        title='Teaching Qualifications by Gender',
+        barmode='group'
     )
     st.plotly_chart(fig_qual_gender, use_container_width=True)
 

@@ -31,11 +31,13 @@ def show(df):
 
     # Reason for teaching by gender
     st.subheader("Reason for Teaching by Gender")
-    reason_gender = pd.crosstab(df['Reason for Teaching'], df['Gender']).reset_index()
+    reason_gender = df.groupby(['Reason for Teaching', 'Gender']).size().reset_index(name='Count')
     fig_reason_gender = create_bar_chart(
         reason_gender,
         x='Reason for Teaching',
-        y=['Male', 'Female'],
-        title='Teaching Motivation by Gender'
+        y='Count',
+        color='Gender',
+        title='Teaching Motivation by Gender',
+        barmode='group'
     )
     st.plotly_chart(fig_reason_gender, use_container_width=True)

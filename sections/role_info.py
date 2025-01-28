@@ -33,11 +33,19 @@ def show(df):
 
     # Subjects by Gender
     st.subheader("Subjects Taught by Gender")
-    subjects_gender = pd.crosstab(subjects, df['Gender'].loc[subjects.index]).reset_index()
+    # Create a long format DataFrame for subjects by gender
+    subjects_df = df['Subjects Taught'].str.split(',').explode().str.strip()
+    subjects_gender_df = pd.DataFrame({
+        'Subject': subjects_df,
+        'Gender': df['Gender'].loc[subjects_df.index]
+    })
+    subjects_gender = subjects_gender_df.groupby(['Subject', 'Gender']).size().reset_index(name='Count')
     fig_subjects_gender = create_bar_chart(
         subjects_gender,
-        x='row_0',
-        y=['Male', 'Female'],
-        title='Subject Distribution by Gender'
+        x='Subject',
+        y='Count',
+        color='Gender',
+        title='Subject Distribution by Gender',
+        barmode='group'
     )
     st.plotly_chart(fig_subjects_gender, use_container_width=True)
