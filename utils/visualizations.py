@@ -1,7 +1,7 @@
 import plotly.express as px
 import plotly.graph_objects as go
 
-def create_bar_chart(df, x, y, title, orientation='v'):
+def create_bar_chart(df, x, y, title, orientation='v', color=None, barmode=None):
     """Create a bar chart using Plotly."""
     fig = px.bar(
         df,
@@ -9,6 +9,8 @@ def create_bar_chart(df, x, y, title, orientation='v'):
         y=y,
         title=title,
         orientation=orientation,
+        color=color,
+        barmode=barmode,
         template='plotly_white'
     )
     fig.update_layout(

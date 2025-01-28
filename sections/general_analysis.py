@@ -36,11 +36,21 @@ def show(df):
 
     # Question 5: Gender distribution by LGA
     st.subheader("Gender Distribution by LGA")
-    gender_lga = pd.crosstab(df['LGA'], df['Gender']).reset_index()
+    # Melt the crosstab to create a long-format dataframe suitable for plotting
+    gender_lga_data = pd.crosstab(df['LGA'], df['Gender']).reset_index()
+    gender_lga_melted = pd.melt(
+        gender_lga_data,
+        id_vars=['LGA'],
+        value_vars=['Male', 'Female'],
+        var_name='Gender',
+        value_name='Count'
+    )
     fig_gender_lga = create_bar_chart(
-        gender_lga,
+        gender_lga_melted,
         x='LGA',
-        y=['Male', 'Female'],
-        title='Gender Distribution by LGA'
+        y='Count',
+        color='Gender',
+        title='Gender Distribution by LGA',
+        barmode='group'
     )
     st.plotly_chart(fig_gender_lga, use_container_width=True)
