@@ -10,10 +10,17 @@ def load_and_process_data(file_path):
     # Check if we need to load CSV data
     df = get_dataframe()
     if df.empty:
-        # Load CSV data into database if it's empty
-        success = load_csv_to_db(file_path)
+        # Load both original and new data
+        original_df = pd.read_csv("attached_assets/merged_teachers_data.csv")
+        new_df = pd.read_csv("attached_assets/combined_data.csv")
+
+        # Combine the datasets
+        combined_df = pd.concat([original_df, new_df], ignore_index=True)
+
+        # Save combined data to database
+        success = load_csv_to_db(combined_df)
         if not success:
-            raise Exception("Failed to load CSV data into database")
+            raise Exception("Failed to load combined data into database")
         df = get_dataframe()
 
     # Clean column names

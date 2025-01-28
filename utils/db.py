@@ -53,12 +53,16 @@ def init_db():
         print(f"Error initializing database: {str(e)}")
         raise
 
-def load_csv_to_db(csv_path):
-    """Load CSV data into the database."""
+def load_csv_to_db(data):
+    """Load data into the database. Accepts either a DataFrame or a file path."""
     try:
-        # Read CSV file
-        print(f"Reading CSV file from: {csv_path}")
-        df = pd.read_csv(csv_path)
+        # Handle both DataFrame and file path inputs
+        if isinstance(data, str):
+            print(f"Reading CSV file from: {data}")
+            df = pd.read_csv(data)
+        else:
+            print("Using provided DataFrame")
+            df = data
 
         # Clean column names
         df.columns = df.columns.str.strip()
@@ -76,7 +80,7 @@ def load_csv_to_db(csv_path):
 
         return True
     except Exception as e:
-        print(f"Error loading CSV to database: {str(e)}")
+        print(f"Error loading data to database: {str(e)}")
         return False
 
 def get_dataframe():
