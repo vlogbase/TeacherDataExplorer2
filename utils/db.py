@@ -5,23 +5,30 @@ from sqlalchemy.exc import SQLAlchemyError
 
 def get_database_url():
     """Get the database URL from environment variables."""
-    return os.getenv('DATABASE_URL')
+    db_url = os.getenv('DATABASE_URL')
+    if not db_url:
+        raise ValueError("DATABASE_URL environment variable is not set")
+    return db_url
 
 def create_engine_with_retries():
     """Create SQLAlchemy engine with proper settings."""
+    db_url = get_database_url()
+    print(f"Creating database engine with URL (redacted credentials)...")
     return create_engine(
-        get_database_url(),
+        db_url,
         pool_pre_ping=True,
         pool_recycle=300
     )
 
 def init_db():
     """Initialize the database and create necessary tables."""
-    engine = create_engine_with_retries()
-    
     try:
-        # Create teachers table
+        engine = create_engine_with_retries()
+
+        # Drop sequence if it exists to avoid the unique constraint violation
         with engine.connect() as conn:
+            conn.execute(text("DROP SEQUENCE IF EXISTS teachers_id_seq CASCADE"))
+            conn.execute(text("DROP TABLE IF EXISTS teachers CASCADE"))
             conn.execute(text("""
                 CREATE TABLE IF NOT EXISTS teachers (
                     id SERIAL PRIMARY KEY,
@@ -41,28 +48,32 @@ def init_db():
                 )
             """))
             conn.commit()
+            print("Database initialized successfully")
     except SQLAlchemyError as e:
-        print(f"Error creating tables: {str(e)}")
+        print(f"Error initializing database: {str(e)}")
         raise
 
 def load_csv_to_db(csv_path):
     """Load CSV data into the database."""
     try:
         # Read CSV file
+        print(f"Reading CSV file from: {csv_path}")
         df = pd.read_csv(csv_path)
-        
+
         # Clean column names
         df.columns = df.columns.str.strip()
-        
+
         # Convert date columns
         df['Date of Birth'] = pd.to_datetime(df['Date of Birth'], errors='coerce')
-        
+
         # Create database connection
         engine = create_engine_with_retries()
-        
+
         # Load data into database
+        print("Loading data into database...")
         df.to_sql('teachers', engine, if_exists='replace', index=False)
-        
+        print("Data loaded successfully")
+
         return True
     except Exception as e:
         print(f"Error loading CSV to database: {str(e)}")
@@ -70,8 +81,9 @@ def load_csv_to_db(csv_path):
 
 def get_dataframe():
     """Get all teacher data as a pandas DataFrame."""
-    engine = create_engine_with_retries()
     try:
+        engine = create_engine_with_retries()
+        print("Retrieving data from database...")
         return pd.read_sql_table('teachers', engine)
     except SQLAlchemyError as e:
         print(f"Error reading from database: {str(e)}")
