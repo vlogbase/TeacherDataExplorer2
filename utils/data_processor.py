@@ -17,6 +17,14 @@ def load_and_process_data(file_path):
         # Combine the datasets
         combined_df = pd.concat([original_df, new_df], ignore_index=True)
 
+        # Remove invalid records (where column names appear as values)
+        invalid_patterns = ['Gender', 'Phone', 'Marital Status', 'Teaching Qualification', 
+                          'Highest Academic Qualification', 'Employment Type', 'Reason for Teaching']
+
+        # Create a mask for valid rows (rows that don't contain column names as values)
+        valid_mask = ~combined_df.apply(lambda x: x.astype(str).str.contains('|'.join(invalid_patterns), case=False)).any(axis=1)
+        combined_df = combined_df[valid_mask]
+
         # Clean gender data
         combined_df['Gender'] = combined_df['Gender'].str.lower()
         combined_df['Gender'] = combined_df['Gender'].apply(
