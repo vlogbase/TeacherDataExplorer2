@@ -17,6 +17,12 @@ def load_and_process_data(file_path):
         # Combine the datasets
         combined_df = pd.concat([original_df, new_df], ignore_index=True)
 
+        # Clean gender data
+        combined_df['Gender'] = combined_df['Gender'].str.lower()
+        combined_df['Gender'] = combined_df['Gender'].apply(
+            lambda x: x if x in ['male', 'female'] else None
+        )
+
         # Save combined data to database
         success = load_csv_to_db(combined_df)
         if not success:
@@ -35,6 +41,7 @@ def load_and_process_data(file_path):
     df['NIN'] = df['NIN'].fillna('Not Provided')
     df['TRCN'] = df['TRCN'].fillna('Not Provided')
     df['Teaching Qualification'] = df['Teaching Qualification'].fillna('None')
+    df['Gender'] = df['Gender'].fillna('Not Specified')
 
     return df
 
