@@ -36,11 +36,13 @@ def show(df):
 
     # Question 5: Gender distribution by LGA
     st.subheader("Gender Distribution by LGA")
-    gender_lga = pd.crosstab(df['LGA'], df['Gender'])
+    # Create a DataFrame with counts for each LGA and Gender combination
+    gender_lga = df.groupby(['LGA', 'Gender']).size().reset_index(name='Count')
     fig_gender_lga = create_bar_chart(
-        gender_lga.reset_index(),
+        gender_lga,
         x='LGA',
-        y=['Male', 'Female'],
+        y='Count',
+        color='Gender',
         title='Gender Distribution by LGA',
         barmode='group'
     )
