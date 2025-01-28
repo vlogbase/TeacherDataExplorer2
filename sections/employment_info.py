@@ -31,8 +31,14 @@ def show(df):
 
     # Years in Current School
     st.subheader("Years in Current School")
+    # Clean and convert years data to numeric format
+    df['Years in Current School'] = pd.to_numeric(
+        df['Years in Current School'].astype(str).str.extract('(\d+)', expand=False),
+        errors='coerce'
+    )
     years_dist = df['Years in Current School'].value_counts().reset_index()
     years_dist.columns = ['Years', 'Count']
+    years_dist = years_dist.sort_values('Years')  # Sort by years in ascending order
     fig_years = create_bar_chart(
         years_dist,
         x='Years',
