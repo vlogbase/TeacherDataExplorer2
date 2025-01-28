@@ -10,6 +10,20 @@ def _add_to_comparison(fig, title):
 
     # Check if graph is already in comparison
     if not any(g['title'] == title for g in st.session_state.selected_graphs):
+        # Update figure layout for better display in comparison view
+        fig.update_layout(
+            height=500,  # Fixed height for consistency
+            width=None,  # Allow width to be responsive
+            margin=dict(t=50, l=50, r=50, b=50),
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
         st.session_state.selected_graphs.append({
             'figure': fig,
             'title': title
@@ -35,7 +49,8 @@ def create_bar_chart(df, x, y, title, orientation='v', color=None, barmode=None)
         orientation=orientation,
         color=color,
         barmode=barmode,
-        template='plotly_white'
+        template='plotly_white',
+        height=400  # Default height for regular view
     )
     fig.update_layout(
         title_x=0.5,
@@ -54,7 +69,8 @@ def create_pie_chart(df, names, values, title):
         df,
         names=names,
         values=values,
-        title=title
+        title=title,
+        height=400  # Default height for regular view
     )
     fig.update_layout(
         title_x=0.5,
@@ -73,7 +89,8 @@ def create_histogram(df, column, title):
         df,
         x=column,
         title=title,
-        template='plotly_white'
+        template='plotly_white',
+        height=400  # Default height for regular view
     )
     fig.update_layout(
         title_x=0.5,
@@ -94,7 +111,8 @@ def create_scatter_plot(df, x, y, color, title):
         y=y,
         color=color,
         title=title,
-        template='plotly_white'
+        template='plotly_white',
+        height=400  # Default height for regular view
     )
     fig.update_layout(
         title_x=0.5,
