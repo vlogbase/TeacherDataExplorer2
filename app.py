@@ -4,7 +4,7 @@ from utils.data_processor import load_and_process_data
 from sections import (
     general_analysis, teacher_background, employment_info,
     previous_experience, qualifications, role_info,
-    resources, other_info
+    resources, other_info, comparison
 )
 
 st.set_page_config(
@@ -25,7 +25,7 @@ def main():
         "Select Analysis Section",
         ["General Analysis", "Teacher Background", "Employment Information",
          "Previous Experience", "Qualifications", "Role Information",
-         "School Resources", "Other Information"]
+         "School Resources", "Other Information", "Comparison Analysis"]
     )
 
     # Display selected section
@@ -43,6 +43,8 @@ def main():
         role_info.show(df)
     elif section == "School Resources":
         resources.show(df)
+    elif section == "Comparison Analysis":
+        comparison.show(df)
     else:
         other_info.show(df)
 

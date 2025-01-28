@@ -1,6 +1,19 @@
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+import streamlit as st
+
+def _add_to_comparison(fig, title):
+    """Helper function to add a graph to comparison section."""
+    if 'selected_graphs' not in st.session_state:
+        st.session_state.selected_graphs = []
+
+    # Check if graph is already in comparison
+    if not any(g['title'] == title for g in st.session_state.selected_graphs):
+        st.session_state.selected_graphs.append({
+            'figure': fig,
+            'title': title
+        })
 
 def create_bar_chart(df, x, y, title, orientation='v', color=None, barmode=None):
     """Create a bar chart using Plotly."""
@@ -28,6 +41,11 @@ def create_bar_chart(df, x, y, title, orientation='v', color=None, barmode=None)
         title_x=0.5,
         margin=dict(t=50, l=50, r=50, b=50)
     )
+
+    # Add comparison checkbox
+    if st.checkbox(f"Add to Compare", key=f"compare_{title}"):
+        _add_to_comparison(fig, title)
+
     return fig
 
 def create_pie_chart(df, names, values, title):
@@ -42,6 +60,11 @@ def create_pie_chart(df, names, values, title):
         title_x=0.5,
         margin=dict(t=50, l=50, r=50, b=50)
     )
+
+    # Add comparison checkbox
+    if st.checkbox(f"Add to Compare", key=f"compare_{title}"):
+        _add_to_comparison(fig, title)
+
     return fig
 
 def create_histogram(df, column, title):
@@ -56,6 +79,11 @@ def create_histogram(df, column, title):
         title_x=0.5,
         margin=dict(t=50, l=50, r=50, b=50)
     )
+
+    # Add comparison checkbox
+    if st.checkbox(f"Add to Compare", key=f"compare_{title}"):
+        _add_to_comparison(fig, title)
+
     return fig
 
 def create_scatter_plot(df, x, y, color, title):
@@ -72,4 +100,9 @@ def create_scatter_plot(df, x, y, color, title):
         title_x=0.5,
         margin=dict(t=50, l=50, r=50, b=50)
     )
+
+    # Add comparison checkbox
+    if st.checkbox(f"Add to Compare", key=f"compare_{title}"):
+        _add_to_comparison(fig, title)
+
     return fig
