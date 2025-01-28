@@ -17,9 +17,14 @@ def show(df):
     )
     st.plotly_chart(fig_schools, use_container_width=True)
 
+    # Clean Reason for Teaching data
+    df_cleaned = df.copy()
+    df_cleaned['Reason for Teaching'] = df_cleaned['Reason for Teaching'].replace('Reason for Teaching', None)
+    df_cleaned['Reason for Teaching'] = df_cleaned['Reason for Teaching'].fillna('Other')
+
     # Reason for becoming a teacher
     st.subheader("Reason for Teaching")
-    reason_dist = df['Reason for Teaching'].value_counts().reset_index()
+    reason_dist = df_cleaned['Reason for Teaching'].value_counts().reset_index()
     reason_dist.columns = ['Reason', 'Count']
     fig_reason = create_pie_chart(
         reason_dist,
@@ -31,7 +36,7 @@ def show(df):
 
     # Reason for teaching by gender
     st.subheader("Reason for Teaching by Gender")
-    reason_gender = df.groupby(['Reason for Teaching', 'Gender']).size().reset_index(name='Count')
+    reason_gender = df_cleaned.groupby(['Reason for Teaching', 'Gender']).size().reset_index(name='Count')
     fig_reason_gender = create_bar_chart(
         reason_gender,
         x='Reason for Teaching',
