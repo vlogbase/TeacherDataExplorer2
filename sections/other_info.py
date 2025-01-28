@@ -22,9 +22,16 @@ def show(df):
         total_subjects = df['Subjects Taught'].str.split(',').explode().nunique()
         st.metric("Unique Subjects", total_subjects)
 
+    # Clean the data
+    df_cleaned = df.copy()
+    df_cleaned['Marital Status'] = df_cleaned['Marital Status'].replace('Marital Status', None)
+    df_cleaned['Marital Status'] = df_cleaned['Marital Status'].fillna('Not Specified')
+    df_cleaned['Employment Type'] = df_cleaned['Employment Type'].replace('Employment Type', None)
+    df_cleaned['Employment Type'] = df_cleaned['Employment Type'].fillna('Not Specified')
+
     # Employment Type Distribution
     st.subheader("Employment Type Analysis")
-    employment_dist = df['Employment Type'].value_counts().reset_index()
+    employment_dist = df_cleaned['Employment Type'].value_counts().reset_index()
     employment_dist.columns = ['Type', 'Count']
     fig_employment = create_bar_chart(
         employment_dist,
@@ -36,7 +43,7 @@ def show(df):
 
     # Marital Status Distribution
     st.subheader("Marital Status Distribution")
-    marital_dist = df['Marital Status'].value_counts().reset_index()
+    marital_dist = df_cleaned['Marital Status'].value_counts().reset_index()
     marital_dist.columns = ['Status', 'Count']
     fig_marital = create_bar_chart(
         marital_dist,
