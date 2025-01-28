@@ -1,23 +1,34 @@
 import pandas as pd
 import numpy as np
+from utils.db import get_dataframe, init_db, load_csv_to_db
 
 def load_and_process_data(file_path):
-    """Load and process the teachers dataset."""
-    df = pd.read_csv(file_path)
-    
+    """Load and process the teachers dataset from database."""
+    # Initialize database if needed
+    init_db()
+
+    # Check if we need to load CSV data
+    df = get_dataframe()
+    if df.empty:
+        # Load CSV data into database if it's empty
+        success = load_csv_to_db(file_path)
+        if not success:
+            raise Exception("Failed to load CSV data into database")
+        df = get_dataframe()
+
     # Clean column names
     df.columns = df.columns.str.strip()
-    
+
     # Convert date columns to datetime
     date_columns = ['Date of Birth']
     for col in date_columns:
         df[col] = pd.to_datetime(df[col], errors='coerce')
-    
+
     # Handle missing values
     df['NIN'] = df['NIN'].fillna('Not Provided')
     df['TRCN'] = df['TRCN'].fillna('Not Provided')
     df['Teaching Qualification'] = df['Teaching Qualification'].fillna('None')
-    
+
     return df
 
 def calculate_age(date_of_birth):
